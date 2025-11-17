@@ -1,12 +1,8 @@
-// -------------------------------------------------------------
-// ไฟล์: app/(main)/new-event/[category]/page.tsx (อัปเดตแล้ว)
-// -------------------------------------------------------------
-'use client';
+"use client";
 
-// 1. Import 'useState'
-import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
+import React, { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ChevronLeftIcon,
   SunIcon,
@@ -18,107 +14,156 @@ import {
   BuildingStorefrontIcon,
   ScaleIcon,
   CurrencyDollarIcon,
-  CheckIcon,
-  ChevronUpDownIcon,
   ArrowUpTrayIcon,
-} from '@heroicons/react/24/outline';
+  CheckIcon,
+} from "@heroicons/react/24/outline";
 
-// ... (const categoryConfig: ... ไม่ต้องแก้ไข) ...
-// 1. สร้าง Config เพื่อกำหนดว่าแต่ละ category มีอะไรบ้าง
+import { createEvent } from "@/lib/api"; // 👈 เพิ่มอันนี้
+import { useSearchParams } from "next/navigation";
+
+// 1. Config ของแต่ละ category (เหมือนเดิม)
 const categoryConfig: Record<string, any> = {
-  // กิจกรรม
   walk: {
-    groupTitle: 'เพิ่มกิจกรรมใหม่',
-    title: 'เดิน',
+    groupTitle: "เพิ่มกิจกรรมใหม่",
+    title: "เดิน",
     icon: <SunIcon className="w-12 h-12" />,
-    fields: ['duration', 'distance'],
+    fields: ["duration", "distance"],
   },
   play: {
-    groupTitle: 'เพิ่มกิจกรรมใหม่',
-    title: 'เวลาเล่น',
+    groupTitle: "เพิ่มกิจกรรมใหม่",
+    title: "เวลาเล่น",
     icon: <PlayCircleIcon className="w-12 h-12" />,
-    fields: ['duration'],
+    fields: ["duration"],
   },
   train: {
-    groupTitle: 'เพิ่มกิจกรรมใหม่',
-    title: 'ฝึก',
+    groupTitle: "เพิ่มกิจกรรมใหม่",
+    title: "ฝึก",
     icon: <AcademicCapIcon className="w-12 h-12" />,
-    fields: ['duration'],
+    fields: ["duration"],
   },
-  // สุขภาพ
   symptom: {
-    groupTitle: 'เพิ่มข้อมูลสุขภาพ',
-    title: 'อาการ',
+    groupTitle: "เพิ่มข้อมูลสุขภาพ",
+    title: "อาการ",
     icon: <ClipboardDocumentListIcon className="w-12 h-12" />,
-    fields: ['reminder'],
+    fields: ["reminder"],
   },
   vaccine: {
-    groupTitle: 'เพิ่มข้อมูลสุขภาพ',
-    title: 'วัคซีน',
+    groupTitle: "เพิ่มข้อมูลสุขภาพ",
+    title: "วัคซีน",
     icon: <ShieldCheckIcon className="w-12 h-12" />,
-    fields: ['reminder'],
+    fields: ["reminder"],
   },
   medicine: {
-    groupTitle: 'เพิ่มข้อมูลสุขภาพ',
-    title: 'ยา',
+    groupTitle: "เพิ่มข้อมูลสุขภาพ",
+    title: "ยา",
     icon: <BeakerIcon className="w-12 h-12" />,
-    fields: ['dosage'],
+    fields: ["dosage"],
   },
   vet: {
-    groupTitle: 'เพิ่มข้อมูลสุขภาพ',
-    title: 'พบสัตว์แพทย์',
+    groupTitle: "เพิ่มข้อมูลสุขภาพ",
+    title: "พบสัตว์แพทย์",
     icon: <BuildingStorefrontIcon className="w-12 h-12" />,
-    fields: ['reminder'],
+    fields: ["reminder"],
   },
   weight: {
-    groupTitle: 'เพิ่มข้อมูลสุขภาพ',
-    title: 'น้ำหนัก',
+    groupTitle: "เพิ่มข้อมูลสุขภาพ",
+    title: "น้ำหนัก",
     icon: <ScaleIcon className="w-12 h-12" />,
-    fields: ['weight'],
+    fields: ["weight"],
   },
-  // ค่าใช้จ่าย
   expense: {
-    groupTitle: 'เพิ่มค่าใช้จ่าย',
-    title: 'ค่าใช้จ่าย',
+    groupTitle: "เพิ่มค่าใช้จ่าย",
+    title: "ค่าใช้จ่าย",
     icon: <CurrencyDollarIcon className="w-12 h-12" />,
-    fields: ['amount'],
+    fields: ["amount"],
   },
 };
 
-// --- คอมโพเนนต์หลักของหน้าฟอร์ม ---
+// ✨ mapping category → eventTypeId + detail.type สำหรับ backend
+const eventTypeMap: Record<
+  string,
+  { eventTypeId: number; detailType: string | null }
+> = {
+  walk: { eventTypeId: 1, detailType: "WALK" },
+  play: { eventTypeId: 2, detailType: "PLAY" },
+  train: { eventTypeId: 3, detailType: "TRAINING" },
+  symptom: { eventTypeId: 4, detailType: "SYMPTOM" },
+  vaccine: { eventTypeId: 5, detailType: "VACCINE" },
+  medicine: { eventTypeId: 6, detailType: "MEDICATION" },
+  vet: { eventTypeId: 7, detailType: "VET_VISIT" },
+  weight: { eventTypeId: 8, detailType: "WEIGHT" },
+  expense: { eventTypeId: 9, detailType: "EXPENSE" },
+};
+
+type FormState = {
+  name: string;
+  date: string; // UI แสดงเฉย ๆ ยังไม่ได้ผูกกับ eventAt
+  time: string; // HH:mm
+  duration_hr: number;
+  duration_min: number;
+  distance: number;
+  weight: number;
+  dosageAmount: number;
+  dosageUnit: string;
+  amount: number;
+  reminder: string;
+  note: string;
+};
+
 const DynamicEventFormPage = () => {
   const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const selectedDate = searchParams.get("date"); // <-- ดึงตรงนี้ครั้งเดียว
+
   const categorySlug = params.category as string;
   const config = categoryConfig[categorySlug];
 
-  // 2. สร้าง "สมอง" (State) สำหรับเก็บข้อมูลฟอร์ม
-  const [formData, setFormData] = useState({
-    name: 'เดินเล่นหลังเลิกงาน',
-    date: '23 พฤศจิกายน พ.ศ.2567', // (ในตัวอย่างนี้ ช่องวันที่ยังเป็น text)
-    time: '12:01',
-    duration_hr: 2,
-    duration_min: 59,
-    distance: 2.5,
+  const [formData, setFormData] = useState<FormState>({
+    name: "",
+    date: selectedDate
+      ? new Date(selectedDate).toLocaleDateString("th-TH", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : "ยังไม่ได้เลือกวัน",
+    time: "12:01",
+    duration_hr: 0,
+    duration_min: 30,
+    distance: 1.0,
     weight: 2.5,
     dosageAmount: 50,
-    dosageUnit: 'mg',
+    dosageUnit: "mg",
     amount: 200,
-    reminder: 'everyday',
-    note: 'มีความสุขมากเลย',
+    reminder: "everyday",
+    note: "",
   });
+  const [saving, setSaving] = useState(false);
 
-  // 3. สร้าง "ตัวจัดการ" การเปลี่ยนแปลง
-  // ฟังก์ชันนี้จะอัปเดต state ทุกครั้งที่เราพิมพ์หรือเลือก
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+
+    // แปลง field จำนวนให้เป็น number
+    const numericFields = [
+      "duration_hr",
+      "duration_min",
+      "distance",
+      "weight",
+      "dosageAmount",
+      "amount",
+    ] as const;
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: numericFields.includes(name as any) ? Number(value) : value,
     }));
   };
 
   if (!config) {
-    // ... (ส่วนนี้เหมือนเดิม) ...
     return (
       <div className="text-center p-10">
         <p>ไม่พบประเภทการบันทึกที่เลือก</p>
@@ -129,25 +174,154 @@ const DynamicEventFormPage = () => {
     );
   }
 
-  // 4. อัปเดตฟังก์ชัน renderDynamicFields ให้ใช้ State
-  const renderDynamicFields = () => {
-    
-    // Helper เล็กๆ สำหรับสร้าง <option> ของตัวเลข
-    const numberOptions = (max: number) => {
-      return Array.from(Array(max).keys()).map(n => (
-        <option key={n} value={n}>{n}</option>
-      ));
+  const buildPayload = (dogId: number, selectedDate: string | null) => {
+    const mapping = eventTypeMap[categorySlug];
+    if (!mapping) throw new Error("Unknown category");
+
+    const { eventTypeId, detailType } = mapping;
+
+    // ถ้ามี selectedDate + time → ใช้เป็น eventAt จริง
+    const eventAt = selectedDate
+      ? new Date(`${selectedDate}T${formData.time || "00:00"}:00`).toISOString()
+      : new Date().toISOString(); // fallback กันพัง
+
+    let detail: any = undefined;
+
+    switch (detailType) {
+      case "WALK":
+        detail = {
+          type: "WALK",
+          distanceKm: formData.distance,
+          durationMin: formData.duration_hr * 60 + formData.duration_min,
+        };
+        break;
+
+      case "PLAY":
+        detail = {
+          type: "PLAY",
+          durationMin: formData.duration_hr * 60 + formData.duration_min,
+        };
+        break;
+
+      case "TRAINING":
+        detail = {
+          type: "TRAINING",
+          durationMin: formData.duration_hr * 60 + formData.duration_min,
+        };
+        break;
+
+      case "SYMPTOM":
+        detail = {
+          type: "SYMPTOM",
+          symptom: formData.name, // ใช้ name เป็นชื่ออาการ
+          severity: undefined,
+          sinceWhen: undefined,
+        };
+        break;
+
+      case "VACCINE":
+        detail = {
+          type: "VACCINE",
+        };
+        break;
+
+      case "MEDICATION":
+        detail = {
+          type: "MEDICATION",
+          dosageAmount: formData.dosageAmount,
+          dosageUnit: formData.dosageUnit,
+        };
+        break;
+
+      case "VET_VISIT":
+        detail = {
+          type: "VET_VISIT",
+          reason: formData.name, // เหตุผลที่ไปหาหมอ
+          clinicName: undefined,
+          vetName: undefined,
+          cost: formData.amount || undefined,
+          nextAppointment: undefined,
+        };
+        break;
+
+      case "WEIGHT":
+        detail = {
+          type: "WEIGHT",
+          weightKg: formData.weight,
+        };
+        break;
+
+      case "EXPENSE":
+        detail = {
+          type: "EXPENSE",
+          amount: formData.amount,
+          currency: "THB",
+        };
+        break;
+
+      default:
+        detail = undefined;
+    }
+
+    return {
+      dogId,
+      eventTypeId,
+      eventAt,
+      note: formData.note || undefined,
+      imageUrl: undefined,
+      detail,
     };
+  };
 
-    // (สไตล์ CSS สำหรับ input/select ที่จะใช้ซ้ำ)
-    const inputStyle = "text-right text-sm border-none focus:ring-0 p-0 w-24 bg-transparent";
-    const selectStyle = "text-right text-sm border-none focus:ring-0 p-0 bg-transparent pr-8";
+  // 🎯 กดปุ่มบันทึก → call createEvent
+  const handleSave = async () => {
+    try {
+      setSaving(true);
 
+      const petIdStr = localStorage.getItem("petId");
+      const petId = petIdStr ? Number(petIdStr) : 0;
+      if (!petId) {
+        alert("ไม่พบรหัสสุนัข (petId) ในระบบ");
+        return;
+      }
+
+      const payload = buildPayload(petId, selectedDate);
+
+      const res = await createEvent(payload);
+      console.log("createEvent petId:", petId);
+      console.log("payload:", payload);
+      if (res.status >= 200 && res.status < 300) {
+        // จะ redirect ไปหน้าก่อนหน้า / หน้า list ก็ได้
+        router.back();
+      } else {
+        console.error("createEvent failed:", res);
+        alert(res.error ?? "บันทึกข้อมูลไม่สำเร็จ");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("เกิดข้อผิดพลาดในการบันทึก");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // helper สำหรับ dynamic fields
+  const renderDynamicFields = () => {
+    const numberOptions = (max: number) =>
+      Array.from(Array(max).keys()).map((n) => (
+        <option key={n} value={n}>
+          {n}
+        </option>
+      ));
+
+    const inputStyle =
+      "text-right text-sm border-none focus:ring-0 p-0 w-24 bg-transparent";
+    const selectStyle =
+      "text-right text-sm border-none focus:ring-0 p-0 bg-transparent pr-8";
 
     return (
       <>
-        {/* ช่อง 'ระยะเวลา' (เปลี่ยนเป็น <select> 2 อัน) */}
-        {config.fields.includes('duration') && (
+        {config.fields.includes("duration") && (
           <div className="flex justify-between items-center py-3 border-b border-gray-100">
             <span className="text-sm text-gray-700">ระยะเวลา:</span>
             <div className="flex items-center gap-2">
@@ -173,8 +347,7 @@ const DynamicEventFormPage = () => {
           </div>
         )}
 
-        {/* ช่อง 'ระยะทาง' (เปลี่ยนเป็น <input type="number">) */}
-        {config.fields.includes('distance') && (
+        {config.fields.includes("distance") && (
           <div className="flex justify-between items-center py-3 border-b border-gray-100">
             <span className="text-sm text-gray-700">ระยะทาง:</span>
             <div className="flex items-center gap-2">
@@ -191,8 +364,7 @@ const DynamicEventFormPage = () => {
           </div>
         )}
 
-        {/* ช่อง 'น้ำหนัก' (เปลี่ยนเป็น <input type="number">) */}
-        {config.fields.includes('weight') && (
+        {config.fields.includes("weight") && (
           <div className="flex justify-between items-center py-3 border-b border-gray-100">
             <span className="text-sm text-gray-700">น้ำหนัก:</span>
             <div className="flex items-center gap-2">
@@ -204,14 +376,12 @@ const DynamicEventFormPage = () => {
                 className={inputStyle}
                 step="0.1"
               />
-              {/* ผมแก้ "บาท" เป็น "กก." ให้ตามรูป "น้ำหนัก" นะครับ */}
               <span className="text-sm text-gray-900">กก.</span>
             </div>
           </div>
         )}
 
-        {/* ช่อง 'ปริมาณยา' (เปลี่ยนเป็น <input> และ <select>) */}
-        {config.fields.includes('dosage') && (
+        {config.fields.includes("dosage") && (
           <div className="flex justify-between items-center py-3 border-b border-gray-100">
             <span className="text-sm text-gray-700">ปริมาณยา:</span>
             <div className="flex items-center gap-2">
@@ -236,9 +406,8 @@ const DynamicEventFormPage = () => {
           </div>
         )}
 
-        {/* ช่อง 'จำนวน' (เปลี่ยนเป็น <input> ที่ควบคุมโดย state) */}
-        {config.fields.includes('amount') && (
-          <div className="flex justify-between items-center py-3 border-b border-gray-100">
+        {config.fields.includes("amount") && (
+          <div className="flex justify_between items-center py-3 border-b border-gray-100">
             <span className="text-sm text-gray-700">จำนวน:</span>
             <div className="flex items-center gap-2">
               <input
@@ -253,8 +422,7 @@ const DynamicEventFormPage = () => {
           </div>
         )}
 
-        {/* ช่อง 'แจ้งเตือน' (เปลี่ยนเป็น <select>) */}
-        {config.fields.includes('reminder') && (
+        {config.fields.includes("reminder") && (
           <>
             <div className="flex justify-between items-center py-3 border-b border-gray-100">
               <span className="text-sm text-gray-700">แจ้งเตือน:</span>
@@ -270,8 +438,12 @@ const DynamicEventFormPage = () => {
               </select>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-gray-100">
-              <span className="text-sm text-gray-700">วันที่สิ้นสุดการแจ้งเตือน:</span>
-              <span className="text-sm text-gray-900">25 พฤศจิกายน พ.ศ.2567</span>
+              <span className="text-sm text-gray-700">
+                วันที่สิ้นสุดการแจ้งเตือน:
+              </span>
+              <span className="text-sm text-gray-900">
+                25 พฤศจิกายน พ.ศ.2567
+              </span>
             </div>
           </>
         )}
@@ -279,10 +451,8 @@ const DynamicEventFormPage = () => {
     );
   };
 
-  // 5. Render หน้า (อัปเดตช่อง Common Fields)
   return (
     <div className="w-full max-w-md mx-auto h-screen bg-gray-50 flex flex-col relative overflow-hidden">
-      {/* Header (ปุ่ม Back และ Title) */}
       <div className="flex items-center justify-center relative mb-4">
         <Link href="/new-event" className="absolute left-0 text-gray-700 p-2">
           <ChevronLeftIcon className="w-6 h-6" />
@@ -292,7 +462,6 @@ const DynamicEventFormPage = () => {
         </h1>
       </div>
 
-      {/* ไอคอนและชื่อ (เหมือนเดิม) */}
       <div className="flex flex-col items-center gap-2 mb-6">
         <div className="w-24 h-24 bg-blue-100/60 rounded-full flex justify-center items-center text-blue-600">
           {config.icon}
@@ -302,32 +471,32 @@ const DynamicEventFormPage = () => {
         </span>
       </div>
 
-      {/* กล่องฟอร์ม */}
       <div className="w-full bg-white rounded-2xl shadow-lg p-6 space-y-2">
         <h2 className="text-base font-semibold text-gray-800 mb-2">
-          {config.groupTitle === 'เพิ่มค่าใช้จ่าย' ? 'ข้อมูลค่าใช้จ่าย' : 'ข้อมูลสุขภาพ'}
+          {config.groupTitle === "เพิ่มค่าใช้จ่าย"
+            ? "ข้อมูลค่าใช้จ่าย"
+            : "ข้อมูลสุขภาพ"}
         </h2>
-        
-        {/* === ช่องฟอร์ม (Common) - อัปเดตแล้ว === */}
+
         <div className="flex justify-between items-center py-3 border-b border-gray-100">
           <span className="text-sm text-gray-700">ชื่อ:</span>
           <input
             type="text"
-            name="name" // <-- เพิ่ม name
-            value={formData.name} // <-- เปลี่ยน defaultValue เป็น value
-            onChange={handleChange} // <-- เพิ่ม onChange
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
             className="text-right text-sm border-none focus:ring-0 p-0 placeholder-gray-400"
             placeholder="เพิ่มชื่อ..."
           />
         </div>
+
         <div className="flex justify-between items-center py-3 border-b border-gray-100">
           <span className="text-sm text-gray-700">วัน:</span>
-          {/* (ในอนาคต ช่องนี้ควรเป็น Date Picker) */}
           <span className="text-sm text-gray-900">{formData.date}</span>
         </div>
+
         <div className="flex justify-between items-center py-3 border-b border-gray-100">
           <span className="text-sm text-gray-700">เวลา:</span>
-          {/* ใช้ <input type="time"> จะดีกว่าปุ่ม dropdown มาก */}
           <input
             type="time"
             name="time"
@@ -337,23 +506,21 @@ const DynamicEventFormPage = () => {
           />
         </div>
 
-        {/* === ช่องฟอร์ม (Dynamic) === */}
         {renderDynamicFields()}
 
-        {/* === ช่องฟอร์ม (Common) - อัปเดตแล้ว === */}
         <div className="flex justify-between items-center py-3 border-b border-gray-100">
           <span className="text-sm text-gray-700">โน้ต:</span>
           <input
             type="text"
-            name="note" // <-- เพิ่ม name
-            value={formData.note} // <-- เปลี่ยน defaultValue เป็น value
-            onChange={handleChange} // <-- เพิ่ม onChange
+            name="note"
+            value={formData.note}
+            onChange={handleChange}
             className="text-right text-sm border-none focus:ring-0 p-0 placeholder-gray-400"
             placeholder="เพิ่มโน้ต..."
           />
         </div>
+
         <div className="flex justify-between items-center py-3">
-          {/* ... (ส่วนอัปโหลดรูป ยังไม่เปลี่ยนแปลง) ... */}
           <span className="text-sm text-gray-700">รูป:</span>
           <div className="flex items-center gap-4">
             <span className="text-xs text-gray-500">1...4 (รูป) อัปโหลด</span>
@@ -364,10 +531,14 @@ const DynamicEventFormPage = () => {
         </div>
       </div>
 
-      {/* ปุ่มบันทึก */}
       <div className="mt-6 flex justify-end">
-        <button className="flex items-center gap-2 bg-amber-300 hover:bg-amber-400 text-gray-800 font-medium py-3 px-6 rounded-full shadow-lg">
-          บันทึก <CheckIcon className="w-5 h-5" />
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 bg-amber-300 hover:bg-amber-400 disabled:opacity-60 disabled:cursor-not-allowed text-gray-800 font-medium py-3 px-6 rounded-full shadow-lg"
+        >
+          {saving ? "กำลังบันทึก..." : "บันทึก"}{" "}
+          <CheckIcon className="w-5 h-5" />
         </button>
       </div>
     </div>

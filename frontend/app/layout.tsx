@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Anuphan } from "next/font/google";
-import { DogRegistrationProvider } from "@/contexts/dog-registration-context"
+import { DogRegistrationProvider } from "@/contexts/dog-registration-context";
 
 const anuphan = Anuphan({
   subsets: ["thai", "latin"],
@@ -38,9 +38,7 @@ export default function RootLayout({
         className={`${anuphan.variable} ${inter.variable} antialiased`}
         style={{ fontFamily: '"Anuphan", "Inter", sans-serif' }}
       >
-        <DogRegistrationProvider>
-          {children}
-        </DogRegistrationProvider>
+        <DogRegistrationProvider>{children}</DogRegistrationProvider>
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import {
   PawPrint,
   Scale,
   ArrowRight,
+  Cat,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -19,26 +20,21 @@ type Dog = {
 };
 
 const Card = ({ dog }: { dog: Dog }) => {
+  const router = useRouter();
 
-    const router = useRouter();
+  const petId = dog.id;
 
-    const petId = dog.id;
-
-    function handlePage() {
-        localStorage.setItem('petId', petId.toString());
-        router.push('/home');
-    }
+  function handlePage() {
+    localStorage.setItem("petId", petId.toString());
+    router.push("/home");
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-3 flex gap-4 border border-[#D1EBF5]">
       {/* Dog image */}
-      <img
-        src={dog.image}
-        width={120}
-        height={120}
-        alt={dog.name}
-        className="rounded-xl object-cover"
-      />
+      <div className="w-60 h-full rounded-2xl overflow-hidden bg-green-50 flex justify-center items-center border border-[#D1EBF5]">
+        <Cat />
+      </div>
 
       {/* Info */}
       <div className="flex flex-col justify-between w-full">
@@ -53,7 +49,10 @@ const Card = ({ dog }: { dog: Dog }) => {
 
         {/* Button */}
         <div className="mt-2 flex justify-end">
-          <button className="flex items-center gap-1 bg-[#FFD774] px-4 py-1.5 rounded-full font-medium text-gray-800" onClick={()=>handlePage()}>
+          <button
+            className="flex items-center gap-1 bg-[#FFD774] px-4 py-1.5 rounded-full font-medium text-gray-800"
+            onClick={() => handlePage()}
+          >
             ต่อไป <ArrowRight className="h-4 w-4" />
           </button>
         </div>

@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState, ReactNode } from "react"
+import { createContext, useContext, useState, ReactNode } from "react";
 
 interface DogRegistrationData {
-  hasDog: boolean | null
-  name: string
-  gender: "MALE" | "FEMALE" | "UNKNOWN" | null
-  birthDate: string
-  breed: string
+  hasDog: boolean | null;
+  name: string;
+  gender: "MALE" | "FEMALE" | "UNKNOWN" | null;
+  birthDate: string;
+  breed: string;
 }
 
 interface DogRegistrationContextType {
-  dogData: DogRegistrationData
-  updateDogData: (data: Partial<DogRegistrationData>) => void
-  resetDogData: () => void
+  dogData: DogRegistrationData;
+  updateDogData: (data: Partial<DogRegistrationData>) => void;
+  resetDogData: () => void;
 }
 
 const initialData: DogRegistrationData = {
@@ -22,32 +22,38 @@ const initialData: DogRegistrationData = {
   gender: null,
   birthDate: "",
   breed: "",
-}
+};
 
-const DogRegistrationContext = createContext<DogRegistrationContextType | undefined>(undefined)
+const DogRegistrationContext = createContext<
+  DogRegistrationContextType | undefined
+>(undefined);
 
 export function DogRegistrationProvider({ children }: { children: ReactNode }) {
-  const [dogData, setDogData] = useState<DogRegistrationData>(initialData)
+  const [dogData, setDogData] = useState<DogRegistrationData>(initialData);
 
   const updateDogData = (data: Partial<DogRegistrationData>) => {
-    setDogData(prev => ({ ...prev, ...data }))
-  }
+    setDogData((prev) => ({ ...prev, ...data }));
+  };
 
   const resetDogData = () => {
-    setDogData(initialData)
-  }
+    setDogData(initialData);
+  };
 
   return (
-    <DogRegistrationContext.Provider value={{ dogData, updateDogData, resetDogData }}>
+    <DogRegistrationContext.Provider
+      value={{ dogData, updateDogData, resetDogData }}
+    >
       {children}
     </DogRegistrationContext.Provider>
-  )
+  );
 }
 
 export function useDogRegistration() {
-  const context = useContext(DogRegistrationContext)
+  const context = useContext(DogRegistrationContext);
   if (!context) {
-    throw new Error("useDogRegistration must be used within DogRegistrationProvider")
+    throw new Error(
+      "useDogRegistration must be used within DogRegistrationProvider",
+    );
   }
-  return context
+  return context;
 }

@@ -20,7 +20,7 @@ type Props = {
 
 export function CreateDogModal({ open, onClose, onCreated }: Props) {
   const [form, setForm] = useState<DogData>({
-    userId: 1,          // TODO: ดึงจาก auth จริง
+    userId: 1, // TODO: ดึงจาก auth จริง
     name: "",
     gender: "UNKNOWN",
     breed: "",
@@ -35,10 +35,12 @@ export function CreateDogModal({ open, onClose, onCreated }: Props) {
   if (!open) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,9 +144,7 @@ export function CreateDogModal({ open, onClose, onCreated }: Props) {
             />
           </div>
 
-          {error && (
-            <p className="text-xs text-red-500">{error}</p>
-          )}
+          {error && <p className="text-xs text-red-500">{error}</p>}
 
           <div className="mt-3 flex justify-end gap-2">
             <button

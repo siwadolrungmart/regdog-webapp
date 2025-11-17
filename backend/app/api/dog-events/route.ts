@@ -58,36 +58,103 @@ export async function POST(req: NextRequest) {
     if (body.detail) {
       switch (body.detail.type) {
         case 'WALK':
-          data.walkEvent = { create: { distanceKm: body.detail.distanceKm, durationMin: body.detail.durationMin, location: body.detail.location } }
+          data.walkEvent = {
+            create: {
+              distanceKm: body.detail.distanceKm,
+              durationMin: body.detail.durationMin,
+            },
+          }
           break
+
         case 'PLAY':
-          data.playEvent = { create: { durationMin: body.detail.durationMin, toy: body.detail.toy, location: body.detail.location } }
+          // PlayEvent: durationMin?
+          data.playEvent = {
+            create: {
+              durationMin: body.detail.durationMin,
+            },
+          }
           break
+
         case 'TRAINING':
-          data.trainingEvent = { create: { durationMin: body.detail.durationMin, skill: body.detail.skill, successLevel: body.detail.successLevel } }
+          data.trainingEvent = {
+            create: {
+              durationMin: body.detail.durationMin,
+            },
+          }
           break
+
         case 'SYMPTOM':
-          data.symptomEvent = { create: { symptom: body.detail.symptom, severity: body.detail.severity, sinceWhen: body.detail.sinceWhen } }
+          data.symptomEvent = {
+            create: {
+              symptom: body.detail.symptom,
+              severity: body.detail.severity,
+              sinceWhen: body.detail.sinceWhen,
+            },
+          }
           break
+
         case 'VACCINE':
-          data.vaccineEvent = { create: { vaccineName: body.detail.vaccineName, dose: body.detail.dose, vetClinic: body.detail.vetClinic, vetName: body.detail.vetName, nextDueDate: body.detail.nextDueDate } }
+          // VaccineEvent: ไม่มี field เพิ่ม → create เปล่าได้
+          data.vaccineEvent = {
+            create: {
+              // vaccineName / dose / vetClinic / vetName / nextDueDate ไม่มีใน schema
+            },
+          }
           break
+
         case 'MEDICATION':
-          data.medicationEvent = { create: { drugName: body.detail.drugName, dosageAmount: body.detail.dosageAmount, dosageUnit: body.detail.dosageUnit, frequency: body.detail.frequency, startDate: body.detail.startDate, endDate: body.detail.endDate } }
+          // MedicationEvent: dosageAmount?, dosageUnit?
+          data.medicationEvent = {
+            create: {
+              dosageAmount: body.detail.dosageAmount,
+              dosageUnit: body.detail.dosageUnit,
+              // drugName / frequency / startDate / endDate ไม่มีใน schema
+            },
+          }
           break
+
         case 'VET_VISIT':
-          data.vetVisitEvent = { create: { reason: body.detail.reason, clinicName: body.detail.clinicName, vetName: body.detail.vetName, cost: body.detail.cost, nextAppointment: body.detail.nextAppointment } }
+          // VetVisitEvent: reason?, clinicName?, vetName?, cost?, nextAppointment?
+          data.vetVisitEvent = {
+            create: {
+              reason: body.detail.reason,
+              clinicName: body.detail.clinicName,
+              vetName: body.detail.vetName,
+              cost: body.detail.cost,
+              nextAppointment: body.detail.nextAppointment,
+            },
+          }
           break
+
         case 'WEIGHT':
-          data.weightEvent = { create: { weightKg: body.detail.weightKg, bodyScore: body.detail.bodyScore } }
+          // WeightEvent: weightKg (required)
+          data.weightEvent = {
+            create: {
+              weightKg: body.detail.weightKg,
+              // bodyScore ไม่มีใน schema
+            },
+          }
           break
+
         case 'EXPENSE':
-          data.expenseEvent = { create: { amount: body.detail.amount, currency: body.detail.currency, category: body.detail.category, paymentNote: body.detail.paymentNote } }
+          // ExpenseEvent: amount, currency?
+          data.expenseEvent = {
+            create: {
+              amount: body.detail.amount,
+              currency: body.detail.currency,
+              // category / paymentNote ไม่มีใน schema
+            },
+          }
           break
       }
     }
 
-    const created = await prisma.dogEvent.create({ data, include: { eventType: true } })
+    const created = await prisma.dogEvent.create({
+      data,
+      include: {
+        eventType: true,
+      },
+    })
     return ok(created, { status: 201 })
   } catch (err: any) {
     if (err?.name === 'ZodError') return badRequest('Invalid body', err)

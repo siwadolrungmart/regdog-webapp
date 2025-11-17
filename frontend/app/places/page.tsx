@@ -22,6 +22,7 @@ import {
 // The alias "@/" seems to be misconfigured in the build environment.
 // Reverting to a relative path to import the Navigation component.
 import Navigation from "../../components/navigation";
+import Bar from "@/components/bar";
 // --- (END FIX) ---
 
 // --- (Helper Types) ---
@@ -40,8 +41,8 @@ type Place = {
   title: string;
   distance: string;
   location: string;
-  lat: number; 
-  lng: number; 
+  lat: number;
+  lng: number;
   phone: string;
   openingHoursSummary: string;
   detailedHours: OpeningHours;
@@ -214,18 +215,18 @@ export default function PlacesPage() {
       distance: "2.1 กม.",
       location: "ใกล้ ม.กรุงเทพ",
       lat: 13.7384,
-      lng:100.5309, // 4. (NEW) เพิ่ม Latitude
-   // 4. (NEW) เพิ่ม Longitude
+      lng: 100.5309, // 4. (NEW) เพิ่ม Latitude
+      // 4. (NEW) เพิ่ม Longitude
       phone: "099-9876543",
       openingHoursSummary: "ปิดวันจันทร์",
       detailedHours: {
-        "วันอาทิตย์": "11:00 - 20:00 น.",
-        "วันจันทร์": "ปิดทำการ",
-        "วันอังคาร": "11:00 - 20:00 น.",
-        "วันพุธ": "11:00 - 20:00 น.",
-        "วันพฤหัสบดี": "11:00 - 20:00 น.",
-        "วันศุกร์": "11:00 - 20:00 น.",
-        "วันเสาร์": "11:00 - 20:00 น.",
+        วันอาทิตย์: "11:00 - 20:00 น.",
+        วันจันทร์: "ปิดทำการ",
+        วันอังคาร: "11:00 - 20:00 น.",
+        วันพุธ: "11:00 - 20:00 น.",
+        วันพฤหัสบดี: "11:00 - 20:00 น.",
+        วันศุกร์: "11:00 - 20:00 น.",
+        วันเสาร์: "11:00 - 20:00 น.",
       },
       website: "www.dogcatcafe.com",
       rating: 4.8,
@@ -239,18 +240,18 @@ export default function PlacesPage() {
       title: "สยาม เพ็ทช็อป",
       distance: "1.5 กม.",
       location: "พีต้า เพ็ทช็อป - BTS สยาม",
-      lat: 13.7460,
+      lat: 13.746,
       lng: 100.5344,
       phone: "088-1234567",
       openingHoursSummary: "เปิด 10:00 - 18:00 น",
       detailedHours: {
-        "วันอาทิตย์": "10:00 - 18:00 น.",
-        "วันจันทร์": "10:00 - 18:00 น.",
-        "วันอังคาร": "10:00 - 18:00 น.",
-        "วันพุธ": "10:00 - 18:00 น.",
-        "วันพฤหัสบดี": "10:00 - 18:00 น.",
-        "วันศุกร์": "10:00 - 18:00 น.",
-        "วันเสาร์": "10:00 - 18:00 น.",
+        วันอาทิตย์: "10:00 - 18:00 น.",
+        วันจันทร์: "10:00 - 18:00 น.",
+        วันอังคาร: "10:00 - 18:00 น.",
+        วันพุธ: "10:00 - 18:00 น.",
+        วันพฤหัสบดี: "10:00 - 18:00 น.",
+        วันศุกร์: "10:00 - 18:00 น.",
+        วันเสาร์: "10:00 - 18:00 น.",
       },
       website: "www.siampetshop.com",
       rating: 5.0,
@@ -266,17 +267,17 @@ export default function PlacesPage() {
       distance: "3.2 กม.",
       location: "สาขาสุขุมวิท",
       lat: 13.7234,
-      lng: 100.5820,
+      lng: 100.582,
       phone: "02-123-4567",
       openingHoursSummary: "เปิด 24 ชั่วโมง",
       detailedHours: {
-        "วันอาทิตย์": "เปิด 24 ชั่วโมง",
-        "วันจันทร์": "เปิด 24 ชั่วโมง",
-        "วันอังคาร": "เปิด 24 ชั่วโมง",
-        "วันพุธ": "เปิด 24 ชั่วโมง",
-        "วันพฤหัสบดี": "เปิด 24 ชั่วโมง",
-        "วันศุกร์": "เปิด 24 ชั่วโมง",
-        "วันเสาร์": "เปิด 24 ชั่วโมง",
+        วันอาทิตย์: "เปิด 24 ชั่วโมง",
+        วันจันทร์: "เปิด 24 ชั่วโมง",
+        วันอังคาร: "เปิด 24 ชั่วโมง",
+        วันพุธ: "เปิด 24 ชั่วโมง",
+        วันพฤหัสบดี: "เปิด 24 ชั่วโมง",
+        วันศุกร์: "เปิด 24 ชั่วโมง",
+        วันเสาร์: "เปิด 24 ชั่วโมง",
       },
       website: "www.thonglorpet.com",
       rating: 4.9,
@@ -291,18 +292,18 @@ export default function PlacesPage() {
       title: "Doggy Style Grooming",
       distance: "4.0 กม.",
       location: "ซอยอารีย์",
-      lat: 13.7800,
-      lng: 100.5450,
+      lat: 13.78,
+      lng: 100.545,
       phone: "081-555-6677",
       openingHoursSummary: "เปิด 09:00 - 17:00 น.",
       detailedHours: {
-        "วันอาทิตย์": "09:00 - 17:00 น.",
-        "วันจันทร์": "ปิดทำการ",
-        "วันอังคาร": "09:00 - 17:00 น.",
-        "วันพุธ": "09:00 - 17:00 น.",
-        "วันพฤหัสบดี": "09:00 - 17:00 น.",
-        "วันศุกร์": "09:00 - 17:00 น.",
-        "วันเสาร์": "09:00 - 17:00 น.",
+        วันอาทิตย์: "09:00 - 17:00 น.",
+        วันจันทร์: "ปิดทำการ",
+        วันอังคาร: "09:00 - 17:00 น.",
+        วันพุธ: "09:00 - 17:00 น.",
+        วันพฤหัสบดี: "09:00 - 17:00 น.",
+        วันศุกร์: "09:00 - 17:00 น.",
+        วันเสาร์: "09:00 - 17:00 น.",
       },
       website: "www.doggystyle.com",
       rating: 4.7,
@@ -321,13 +322,13 @@ export default function PlacesPage() {
       phone: "02-222-3333",
       openingHoursSummary: "เปิด 10:00 - 20:00 น.",
       detailedHours: {
-        "วันอาทิตย์": "10:00 - 20:00 น.",
-        "วันจันทร์": "10:00 - 20:00 น.",
-        "วันอังคาร": "10:00 - 20:00 น.",
-        "วันพุธ": "10:00 - 20:00 น.",
-        "วันพฤหัสบดี": "10:00 - 20:00 น.",
-        "วันศุกร์": "10:00 - 20:00 น.",
-        "วันเสาร์": "10:00 - 20:00 น.",
+        วันอาทิตย์: "10:00 - 20:00 น.",
+        วันจันทร์: "10:00 - 20:00 น.",
+        วันอังคาร: "10:00 - 20:00 น.",
+        วันพุธ: "10:00 - 20:00 น.",
+        วันพฤหัสบดี: "10:00 - 20:00 น.",
+        วันศุกร์: "10:00 - 20:00 น.",
+        วันเสาร์: "10:00 - 20:00 น.",
       },
       website: "www.petfriendlycafe.com",
       rating: 4.5,
@@ -336,40 +337,27 @@ export default function PlacesPage() {
     },
   ];
   const filteredPlaces = selectedCategory // ถ้ามี category ที่เลือก
-  ? mockPlaces.filter((place) => place.category === selectedCategory) // ให้กรอง
-  : mockPlaces; // ไม่งั้น (selectedCategory เป็น null) ให้แสดงทั้งหมด
- 
+    ? mockPlaces.filter((place) => place.category === selectedCategory) // ให้กรอง
+    : mockPlaces; // ไม่งั้น (selectedCategory เป็น null) ให้แสดงทั้งหมด
+
   const mapPlaces = filteredPlaces.map((p) => ({
     id: p.id,
     title: p.title,
     lat: p.lat,
     lng: p.lng,
   }));
-  
-  
 
   return (
-    <div className="w-full max-w-md mx-auto h-screen bg-gray-50 flex flex-col relative overflow-hidden">
+    <div className="mobile">
       {/* 1. Top Navigation */}
-      <header className="flex justify-between items-center p-4 pt-14 z-20">
-        <button className="p-2">
-          <Menu className="w-6 h-6 text-gray-700" />
-        </button>
-        <div className="flex items-center gap-4">
-          <button className="p-2">
-            <Bell className="w-6 h-6 text-gray-700" />
-          </button>
-          <button className="p-2">
-            <User className="w-6 h-6 text-gray-700" />
-          </button>
-        </div>
+      <header className="relative flex justify-between items-center px-4 z-20">
+        <Bar />
       </header>
 
       {/* 2. Main Scrollable Content */}
       <main className="flex-1 overflow-y-auto px-4 py-3.5 space-y-6 pb-24">
         {/* Map Placeholder */}
         <div className="w-full h-72 bg-gray-300 rounded-xl shadow-md overflow-hidden">
-         
           <MyMap places={mapPlaces} />
         </div>
 

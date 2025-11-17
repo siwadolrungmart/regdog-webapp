@@ -131,20 +131,15 @@ export default function PetProfilePage() {
   };
 
   return (
-    <div className="mobile flex flex-col items-center px-4">
-      <Bar />
+    <div className="mobile w-full flex flex-col items-center">
+      <header className="flex justify-between items-center px-4 z-20 w-full">
+        <Bar />
+      </header>
 
-      <div className="flex flex-col items-center w-full rounded-[15px] px-2.5 py-2.5 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
+      <div className="flex flex-col items-center w-full rounded-[15px] px-2.5 py-4">
         {/* avatar */}
         <div className="relative w-fit">
-          <img
-            src={
-              data?.avatarUrl ||
-              "https://images.pexels.com/photos/792381/pexels-photo-792381.jpeg?auto=compress&cs=tinysrgb&w=300"
-            }
-            alt={data?.name ?? "Dog Avatar"}
-            className="h-28 w-28 rounded-full object-cover"
-          />
+          <div className="w-28 h-28 bg-gray-50 rounded-full border-2 border-73a2ac"></div>
           <button
             type="button"
             onClick={() => setIsEditing(true)}
@@ -215,8 +210,8 @@ function ProfileView({ data }: { data: DogData }) {
         data.gender === "MALE"
           ? "เพศผู้"
           : data.gender === "FEMALE"
-          ? "เพศเมีย"
-          : "ไม่ระบุ",
+            ? "เพศเมีย"
+            : "ไม่ระบุ",
       )}
       {row("สายพันธุ์", data.breed ?? "")}
       {row("วันเกิด", formatDateThai(data.birthDate))}
@@ -239,12 +234,7 @@ type ProfileFormProps = {
   onSubmit: (e: React.FormEvent) => void;
 };
 
-function ProfileForm({
-  data,
-  onChange,
-  onCancel,
-  onSubmit,
-}: ProfileFormProps) {
+function ProfileForm({ data, onChange, onCancel, onSubmit }: ProfileFormProps) {
   const fieldClass =
     "w-full rounded-xl border border-[#cde4f2] bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#ffd56a]";
 

@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Plus,
-} from "lucide-react";
+import { Plus } from "lucide-react";
 
 import Card from "@/components/card";
 import Bar from "@/components/bar";
@@ -53,26 +51,31 @@ export default function DogsPage() {
     fetchDogs();
   }, [userId, page, pageSize]);
   const handleCreated = (newDog: any) => {
-    setDogs(prev => [newDog, ...prev]);
+    setDogs((prev) => [newDog, ...prev]);
     setShowCreate(false);
   };
 
   return (
-    <div className="mobile relative min-h-screen bg-[#F3F4F6] p-4">
+    <div className="w-full max-w-md mx-auto h-screen flex flex-col items-center relative overflow-hidden px-2.5">
       {/* Header */}
       <Bar />
 
       {/* Dog cards list */}
-      <div className="flex flex-col gap-6 mt-2">
-        {loading && <p className="text-center text-sm text-gray-500">กำลังโหลด...</p>}
+      <div className="flex flex-col gap-6 mt-2 w-full">
+        {loading && (
+          <p className="text-center text-sm text-gray-500">กำลังโหลด...</p>
+        )}
         {error && !loading && (
           <p className="text-center text-sm text-red-500">{error}</p>
         )}
         {!loading && !error && dogs.length === 0 && (
-          <p className="text-center text-sm text-gray-500">ยังไม่มีสุนัขในระบบ</p>
+          <p className="text-center text-sm text-gray-500">
+            ยังไม่มีสุนัขในระบบ
+          </p>
         )}
         {!loading &&
-          !error && dogs.length > 0 &&
+          !error &&
+          dogs.length > 0 &&
           dogs.map((dog) => <Card key={dog.id} dog={dog} />)}
       </div>
 
