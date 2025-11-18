@@ -48,7 +48,7 @@ export function CreateDogModal({ open, onClose, onCreated }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const res = await createDog(form);
+      const res = await createDog(form as any);
       if (res.status >= 200 && res.status < 300 && res.data) {
         onCreated(res.data); // ส่ง dog กลับไปให้ list
       } else {

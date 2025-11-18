@@ -11,7 +11,7 @@ interface DogData {
   name?: string;
   gender?: "MALE" | "FEMALE" | "UNKNOWN";
   breed?: string;
-  birthDate?: string | null; // ใช้ string จาก API เช่น "2025-11-14"
+  birthDate?: string; // ใช้ string จาก API เช่น "2025-11-14"
   microchipNumber?: string;
   pedigreeFileUrl?: string;
   chronicDiseases?: string;
@@ -52,7 +52,7 @@ export default function PetProfilePage() {
             gender: dog.gender,
             breed: dog.breed ?? "",
             // ถ้า backend ส่ง ISO string มาอยู่แล้ว ก็เก็บเป็น string ตรง ๆ
-            birthDate: dog.birthDate ?? null,
+            birthDate: dog.birthDate ?? undefined,
             microchipNumber: dog.microchipNumber ?? "",
             pedigreeFileUrl: dog.pedigreeFileUrl ?? "",
             chronicDiseases: dog.chronicDiseases ?? "",
@@ -107,12 +107,12 @@ export default function PetProfilePage() {
       const petIdStr = localStorage.getItem("petId");
       const petId = petIdStr ? Number(petIdStr) : 0;
       if (petId) {
-        // เตรียม body: ตัดค่าที่เป็น "" ให้เป็น undefined (ไม่อัปเดต)
-        const body: DogData = {
+        // เตรียม body: ตัดค่าที่เป็น "" หรือ null ให้เป็น undefined (ไม่อัปเดต)
+        const body: Partial<DogData> = {
           name: data.name || undefined,
           gender: data.gender,
           breed: data.breed || undefined,
-          birthDate: data.birthDate || undefined,
+          birthDate: data.birthDate ?? undefined,
           microchipNumber: data.microchipNumber || undefined,
           pedigreeFileUrl: data.pedigreeFileUrl || undefined,
           chronicDiseases: data.chronicDiseases || undefined,
@@ -120,7 +120,7 @@ export default function PetProfilePage() {
           ownerPhone: data.ownerPhone || undefined,
           ownerAddress: data.ownerAddress || undefined,
           extraDescription: data.extraDescription || undefined,
-          lostStatus: data.lostStatus,
+          lostStatus: data.lostStatus ?? undefined,
         };
 
         try {

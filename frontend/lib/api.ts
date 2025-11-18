@@ -131,7 +131,7 @@ export async function updateDog(
 }
 
 export async function createEvent(
-  data, // หรือใส่ type ละเอียดทีหลังได้
+  data: { dogId: number; eventTypeId: number; eventAt: string; note: string | undefined; imageUrl: undefined; detail: any; }, // หรือใส่ type ละเอียดทีหลังได้
 ): Promise<ApiResponse> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/dog-events`, {

@@ -54,7 +54,7 @@ export default function DogBreedPage() {
       birthDate: dogData.birthDate || undefined,
     };
 
-    const result = await createDog(dogPayload);
+    const result = await createDog(dogPayload as any);
     setLoading(false);
 
     if (result.status === 201) {
