@@ -36,9 +36,20 @@ export default function DogsPage() {
       setError(null);
       try {
         const res = await getDogs(userId, page, pageSize);
+        console.log(res)
         console.log("fetch dogs response: ", res);
         if (res.status >= 200 && res.status < 300 && res.data) {
-          setDogs(res.data.items);
+          // Map backend items to local Dog type and provide fallbacks for missing fields
+          const mapped: Dog[] = res.data.items.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            date: item.date,
+            age: item.age,
+            breed: item.breed,
+            weight: item.weight,
+            image: item.image,
+          }));
+          setDogs(mapped);
         } else {
           setError(res.error ?? "โหลดข้อมูลไม่สำเร็จ");
         }
