@@ -61,7 +61,11 @@ export default function PetProfilePage() {
             ownerPhone: dog.ownerPhone ?? "",
             ownerAddress: dog.ownerAddress ?? "",
             extraDescription: dog.extraDescription ?? "",
-            lostStatus: dog.lostStatus ?? "NORMAL",
+            lostStatus: ["UNKNOWN", "NORMAL", "LOST", "FOUND"].includes(
+              dog.lostStatus as any,
+            )
+              ? (dog.lostStatus as DogData["lostStatus"])
+              : "NORMAL",
           });
         } else {
           setError("ไม่พบข้อมูลสุนัข");
@@ -132,6 +136,7 @@ export default function PetProfilePage() {
 
   return (
     <div className="mobile w-full flex flex-col items-center">
+
       <header className="flex justify-between items-center px-4 z-20 w-full">
         <Bar />
       </header>

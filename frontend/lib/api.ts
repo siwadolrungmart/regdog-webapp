@@ -17,6 +17,12 @@ interface LoginData {
 }
 
 interface DogData {
+  lostStatus: string;
+  extraDescription: string;
+  avatarUrl: string;
+  chronicDiseases: string;
+  microchipNumber: string;
+  pedigreeFileUrl: string;
   userId: number;
   name: string;
   gender: "MALE" | "FEMALE" | "UNKNOWN";
