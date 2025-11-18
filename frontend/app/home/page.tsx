@@ -438,7 +438,15 @@ export default function HomePage() {
           return;
         }
         const res = await getDogById(petId);
-        if (res.data) setDog(res.data);
+        if (res.data) {
+          const d: any = res.data;
+          const mapped: Dog = {
+            id: d.id,
+            name: d.name ?? d.displayName ?? "",
+            avatarUrl: d.avatarUrl ?? d.avatar_url ?? null,
+          };
+          setDog(mapped);
+        }
 
         await fetchWeeklyEvents(petId);
         await fetchWeeklyExpenses(petId);
