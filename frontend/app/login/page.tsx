@@ -70,7 +70,7 @@ export default function LoginPage() {
               // บันทึก userId ลง localStorage
               localStorage.setItem("userId", result.data.id);
               localStorage.setItem("userEmail", result.data.email);
-              router.push("/");
+              router.push("/home");
             } else {
               setError(result.error || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
             }
