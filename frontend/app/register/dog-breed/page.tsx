@@ -33,7 +33,7 @@ export default function DogBreedPage() {
 
     // ถ้าไม่มีข้อมูล hasDog หรือเลือกไม่มีสุนัข ให้ข้ามไปหน้าหลัก
     if (!dogData.hasDog) {
-      router.push("/");
+      router.push("/home");
       return;
     }
 
@@ -58,7 +58,11 @@ export default function DogBreedPage() {
     setLoading(false);
 
     if (result.status === 201) {
-      router.push("/");
+      // บันทึก petId ลง localStorage
+      if (result.data?.id) {
+        localStorage.setItem("petId", result.data.id.toString());
+      }
+      router.push("/home");
     } else {
       alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     }
@@ -147,7 +151,7 @@ export default function DogBreedPage() {
           <div className="flex items-start justify-end" style={{ gap: "5px" }}>
             <Button
               variant="outline"
-              className="text-base font-medium border border-ffeca5 hover:bg-ffeca5"
+              className="text-base font-medium border border-ffeca5 hover:bg-ffeca5 bg-white"
               style={{ width: "55px", height: "40px", borderRadius: "100px" }}
               onClick={async () => {
                 await handleSubmit(true);

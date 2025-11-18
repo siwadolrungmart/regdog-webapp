@@ -77,7 +77,7 @@ export default function DogNamePage() {
           <div className="flex items-start justify-end" style={{ gap: "5px" }}>
             <Button
               variant="outline"
-              className="text-base font-medium border border-ffeca5 hover:bg-ffeca5"
+              className="text-base font-medium border border-ffeca5 hover:bg-ffeca5 bg-white"
               style={{ width: "55px", height: "40px", borderRadius: "100px" }}
               onClick={() => handleNext(true)}
             >

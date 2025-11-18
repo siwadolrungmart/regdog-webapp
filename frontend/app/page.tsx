@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 
 const page = () => {
   useEffect(() => {
-    window.location.href = "/home";
+    window.location.href = "/login";
   }, []);
   return <div>page</div>;
 };
