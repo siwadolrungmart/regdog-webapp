@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Menu, Bell, User, BarChart3, PlaySquare, Upload } from "lucide-react";
 import Navigation from "../../components/navigation";
-import { getDogById, getEvent } from "@/lib/api";
+import { getDogById, getDogEvents, getEvent } from "@/lib/api";
 import Bar from "@/components/bar";
 
 // ---------- Types ----------
@@ -190,6 +190,22 @@ const WeeklyExpenseChart = ({ expenses }: { expenses: WeeklyExpense[] }) => {
     />
   );
 };
+ // คืนวันอาทิตย์ ของสัปดาห์ปัจจุบัน (00:00)
+function getStartOfWeek(date: Date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = Sunday
+  d.setDate(d.getDate() - day); // ถ้าวันพุธ 20 → ลบ 3 → อาทิตย์ 17
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// คืนวันเสาร์ ของสัปดาห์ (23:59:59)
+function getEndOfWeek(start: Date) {
+  const d = new Date(start);
+  d.setDate(d.getDate() + 6); // Sunday + 6 = Saturday
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
 
 // ---------- Main Page ----------
 export default function HomePage() {
@@ -204,16 +220,14 @@ export default function HomePage() {
   const [weeklyExpenses, setWeeklyExpenses] = useState<WeeklyExpense[]>([]);
   const [loadingExpenses, setLoadingExpenses] = useState(false);
 
+  const weekStart = useMemo(() => getStartOfWeek(new Date()), []);
+  
   const [activeDayIndex, setActiveDayIndex] = useState(0);
+
   const dailyActivities = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // ใช้ weekStart ที่ fix แล้ว
+    const sunday = new Date(weekStart);
 
-    // หาวันอาทิตย์ของสัปดาห์นี้
-    const sunday = new Date(today);
-    sunday.setDate(sunday.getDate() - sunday.getDay()); // 0 = Sunday
-
-    // สร้าง 7 วัน (อาทิตย์ → เสาร์)
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(sunday);
       d.setDate(sunday.getDate() + i);
@@ -234,7 +248,8 @@ export default function HomePage() {
 
       return { dateKey: key, label, items: itemsForDay };
     });
-  }, [weeklyActivities]);
+  }, [weeklyActivities, weekStart]);
+
   useEffect(() => {
     if (dailyActivities.length === 0) return;
 
@@ -326,106 +341,95 @@ export default function HomePage() {
     }
   };
 
+ 
+
   const fetchWeeklyEvents = async (dogId: number) => {
-    try {
-      setLoadingEvents(true);
+  try {
+    setLoadingEvents(true);
 
-      const now = new Date();
-      // today 00:00
-      const today = new Date(now);
-      today.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const weekStart = getStartOfWeek(now);      // อาทิตย์
+    const weekEnd = getEndOfWeek(weekStart);    // เสาร์
 
-      // หา "วันอาทิตย์" ของสัปดาห์นี้
-      const since = new Date(today);
-      since.setDate(today.getDate() - today.getDay()); // 0 = อาทิตย์
+    const res = await getDogEvents({
+      dogId,
+      since: weekStart.toISOString(),
+      until: weekEnd.toISOString(),
+      page: 1,
+      pageSize: 200,
+    });
 
-      // until = เสาร์ ของสัปดาห์นี้ (สุดวัน)
-      const until = new Date(since);
-      until.setDate(since.getDate() + 7); // ไปอาทิตย์ถัดไป
-      until.setMilliseconds(-1); // 23:59:59.999 ของเสาร์
+    if (res.status >= 200 && res.status < 300 && res.data?.items) {
+      const events: DogEvent[] = res.data.items;
+      const activities = events
+        .sort(
+          (a, b) =>
+            new Date(a.eventAt).getTime() - new Date(b.eventAt).getTime(),
+        )
+        .map(mapEventToActivity);
 
-      const res = await getEvent({
-        dogId,
-        since: since.toISOString(),
-        until: until.toISOString(),
-      });
-
-      if (res.data?.items) {
-        const events: DogEvent[] = res.data.items;
-        const activities = events
-          .sort(
-            (a, b) =>
-              new Date(a.eventAt).getTime() - new Date(b.eventAt).getTime(),
-          )
-          .map(mapEventToActivity);
-
-        setWeeklyActivities(activities);
-      } else {
-        setWeeklyActivities([]);
-      }
-    } catch (err) {
-      console.error("getEvent error:", err);
+      setWeeklyActivities(activities);
+    } else {
       setWeeklyActivities([]);
-    } finally {
-      setLoadingEvents(false);
     }
-  };
+  } catch (err) {
+    console.error("getDogEvents error:", err);
+    setWeeklyActivities([]);
+  } finally {
+    setLoadingEvents(false);
+  }
+};
 
   const fetchWeeklyExpenses = async (dogId: number) => {
-    try {
-      setLoadingExpenses(true);
+  try {
+    setLoadingExpenses(true);
 
-      const now = new Date();
-      const today = new Date(now);
-      today.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const weekStart = getStartOfWeek(now);
+    const weekEnd = getEndOfWeek(weekStart);
 
-      const since = new Date(today);
-      since.setDate(today.getDate() - today.getDay()); // อาทิตย์
+    const res = await getDogEvents({
+      dogId,
+      since: weekStart.toISOString(),
+      until: weekEnd.toISOString(),
+      page: 1,
+      pageSize: 200,
+    });
 
-      const until = new Date(since);
-      until.setDate(since.getDate() + 7);
-      until.setMilliseconds(-1);
+    if (res.status >= 200 && res.status < 300 && res.data?.items) {
+      const events: DogEvent[] = res.data.items;
 
-      const res = await getEvent({
-        dogId,
-        since: since.toISOString(),
-        until: until.toISOString(),
-      });
+      const expenseEvents = events.filter(
+        (e) => e.eventType?.category === "EXPENSE" && e.expenseEvent,
+      );
 
-      if (res.data?.items) {
-        const events: DogEvent[] = res.data.items;
-
-        const expenseEvents = events.filter(
-          (e) => e.eventType?.category === "EXPENSE" && e.expenseEvent,
-        );
-
-        const expenses: WeeklyExpense[] = expenseEvents.map((e) => {
-          const d = new Date(e.eventAt);
-          const dateLabel = d.toLocaleDateString("th-TH", {
-            day: "numeric",
-            month: "short",
-          });
-
-          return {
-            id: e.id,
-            title: e.eventType?.nameTh || "ค่าใช้จ่าย",
-            amount: e.expenseEvent?.amount ?? 0,
-            dateLabel,
-            eventAt: e.eventAt,
-          };
+      const expenses: WeeklyExpense[] = expenseEvents.map((e) => {
+        const d = new Date(e.eventAt);
+        const dateLabel = d.toLocaleDateString("th-TH", {
+          day: "numeric",
+          month: "short",
         });
 
-        setWeeklyExpenses(expenses);
-      } else {
-        setWeeklyExpenses([]);
-      }
-    } catch (err) {
-      console.error("fetchWeeklyExpenses error:", err);
+        return {
+          id: e.id,
+          title: e.eventType?.nameTh || "ค่าใช้จ่าย",
+          amount: e.expenseEvent?.amount ?? 0,
+          dateLabel,
+          eventAt: e.eventAt,
+        };
+      });
+
+      setWeeklyExpenses(expenses);
+    } else {
       setWeeklyExpenses([]);
-    } finally {
-      setLoadingExpenses(false);
     }
-  };
+  } catch (err) {
+    console.error("fetchWeeklyExpenses error:", err);
+    setWeeklyExpenses([]);
+  } finally {
+    setLoadingExpenses(false);
+  }
+};
 
   // โหลดข้อมูลสุนัข + event
   useEffect(() => {

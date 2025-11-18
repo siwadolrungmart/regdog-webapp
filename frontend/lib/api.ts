@@ -189,17 +189,28 @@ export async function getEvents(dogId?: number): Promise<ApiResponse> {
   }
 }
 // lib/api.ts
-export async function getDogEvents(dogId?: number): Promise<ApiResponse> {
+export async function getDogEvents(params?: {
+  dogId?: number;
+  page?: number;
+  pageSize?: number;
+  since?: string;
+  until?: string;
+}): Promise<ApiResponse> {
   try {
-    const params = new URLSearchParams();
-    if (dogId) params.set("dogId", dogId.toString());
+    const qs = new URLSearchParams();
+
+    if (params?.dogId) qs.set("dogId", params.dogId.toString());
+    if (params?.page) qs.set("page", params.page.toString());
+    if (params?.pageSize) qs.set("pageSize", params.pageSize.toString());
+    if (params?.since) qs.set("since", params.since);
+    if (params?.until) qs.set("until", params.until);
 
     const res = await fetch(
-      `${API_BASE_URL}/api/dog-events?${params.toString()}`,
+      `${API_BASE_URL}/api/dog-events?${qs.toString()}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-      },
+      }
     );
 
     const json = await res.json().catch(() => ({}));
@@ -269,4 +280,26 @@ export async function getDogEventsByRange(params: {
     data: json,
     error: json.error as string | undefined,
   };
+}
+
+
+export async function getUserById(id: number) {
+  const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const json = await res.json().catch(() => ({}));
+  return { status: res.status, data: json };
+}
+
+export async function updateUser(id: number, body: any) {
+  const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const json = await res.json().catch(() => ({}));
+  return { status: res.status, data: json };
 }

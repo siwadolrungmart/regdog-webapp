@@ -1,155 +1,19 @@
-"use client"; // <-- เพิ่มบรรทัดนี้ที่ด้านบนสุด
+"use client";
 
-import React, { useState } from "react"; // Import useState
+import React, { useEffect, useState } from "react";
 import Navigation from "@/components/navigation";
 import Bar from "@/components/bar";
-// --- Icon Components (using inline SVG) ---
-// We use inline SVGs so this file is self-contained.
-// These are based on the 'lucide-react' icon library.
+import { getUserById, updateUser } from "@/lib/api"; // 👈 API จริง
 
-const QrCode = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <rect width="5" height="5" x="3" y="3" rx="1" />
-    <rect width="5" height="5" x="16" y="3" rx="1" />
-    <rect width="5" height="5" x="3" y="16" rx="1" />
-    <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
-    <path d="M21 21v.01" />
-    <path d="M12 7v3a2 2 0 0 1-2 2H7" />
-    <path d="M3 12h.01" />
-    <path d="M12 3h.01" />
-    <path d="M12 16h.01" />
-    <path d="M16 12h.01" />
-    <path d="M21 12h.01" />
-  </svg>
-);
+// ----------------------
+// Reusable Components
+// ----------------------
 
-const CalendarDays = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-    <line x1="16" x2="16" y1="2" y2="6" />
-    <line x1="8" x2="8" y1="2" y2="6" />
-    <line x1="3" x2="21" y1="10" y2="10" />
-  </svg>
-);
-
-const Home = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    <polyline points="9 22 9 12 15 12 15 22" />
-  </svg>
-);
-
-const MapPin = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
-const CircleUser = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="10" r="3" />
-    <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />
-  </svg>
-);
-
-const Check = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-);
-
-const ChevronDown = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-);
-
-// --- Define Props Interface for ProfileInfoRow ---
 interface ProfileInfoRowProps {
   label: string;
   value: string;
 }
 
-// --- Reusable Profile Info Row Component ---
 const ProfileInfoRow = ({ label, value }: ProfileInfoRowProps) => (
   <div className="py-3">
     <div className="flex justify-between items-start">
@@ -160,13 +24,13 @@ const ProfileInfoRow = ({ label, value }: ProfileInfoRowProps) => (
   </div>
 );
 
-// --- NEW: Reusable Profile Input Row Component ---
 interface ProfileInputRowProps {
   label: string;
-  name: string; // 'name' attribute for the input
+  name: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
+
 const ProfileInputRow = ({
   label,
   name,
@@ -187,52 +51,128 @@ const ProfileInputRow = ({
   </div>
 );
 
-// --- Main App Component ---
+// ----------------------
+// Main Component
+// ----------------------
+
 export default function App() {
-  // --- State Management ---
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const initialData = {
-    name: "นายศิวดล รังมาตย์",
-    phone: "0630214568",
-    address: "22/2 ถ.เทศบาลอาชา ซ.เทศบาลอาชา6 ต.ตลาด อ.เมือง จ.มหาสารคาม",
+  const [profileData, setProfileData] = useState({
+    name: "",
+    phone: "",
+    address: "",
     bio: "",
-  };
+  });
 
-  const [profileData, setProfileData] = useState(initialData);
-  const [originalData, setOriginalData] = useState(initialData);
+  const [originalData, setOriginalData] = useState(profileData);
 
-  // --- Event Handlers ---
+  // -----------------------------
+  // 1) FETCH FROM localStorage + API
+  // -----------------------------
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userIdStr = localStorage.getItem("userId");
+        if (!userIdStr) {
+          console.warn("No userId found in localStorage");
+          setLoading(false);
+          return;
+        }
+
+        const userId = Number(userIdStr);
+
+        const res = await getUserById(userId);
+
+        if (res?.data) {
+          const u = res.data;
+
+          const mapped = {
+            name: u.name ?? "",
+            phone: u.phone ?? "",
+            address: u.address ?? "",
+            bio: u.bio ?? "",
+          };
+
+          setProfileData(mapped);
+          setOriginalData(mapped);
+        }
+      } catch (err) {
+        console.error("Load user error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  // -----------------------------
+  // Change handlers
+  // -----------------------------
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setProfileData((prevData) => ({
-      ...prevData,
+    setProfileData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
   const handleEditClick = () => {
-    setOriginalData(profileData); // Save current state as original before editing
+    setOriginalData(profileData);
     setIsEditing(true);
   };
 
-  const handleSaveClick = () => {
-    // In a real app, you would save profileData to your backend API here
-    console.log("Saving data:", profileData);
-    setIsEditing(false);
-    // Set original data to new saved data
-    setOriginalData(profileData);
+  // -----------------------------
+  // SAVE → Update API
+  // -----------------------------
+  const handleSaveClick = async () => {
+    try {
+      const userIdStr = localStorage.getItem("userId");
+      if (!userIdStr) {
+        alert("ไม่พบ userId ใน localStorage");
+        return;
+      }
+
+      const userId = Number(userIdStr);
+
+      const body = {
+        name: profileData.name,
+        phone: profileData.phone,
+        address: profileData.address,
+        bio: profileData.bio,
+      };
+
+      await updateUser(userId, body);
+
+      setOriginalData(profileData);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Save user error:", err);
+      alert("บันทึกไม่สำเร็จ");
+    }
   };
 
   const handleCancelClick = () => {
-    setProfileData(originalData); // Revert to original data
+    setProfileData(originalData);
     setIsEditing(false);
   };
 
+  // -----------------------------
+  // UI
+  // -----------------------------
+
+  if (loading)
+    return (
+      <div className="mobile flex items-center justify-center text-gray-500">
+        กำลังโหลดข้อมูล...
+      </div>
+    );
+
   return (
-    // Main container
     <div className="mobile pb-20">
       {/* Top Nav */}
       <header className="relative flex justify-between items-center px-4 z-20">
@@ -242,102 +182,84 @@ export default function App() {
       {/* Profile Header */}
       <div className="flex flex-col items-center mt-4 mb-6">
         <img
-          src="https://placehold.co/120x120/EBF8FF/3182CE?text=User&font=sans"
-          alt="User profile picture"
+          src="https://placehold.co/120x120/EBF8FF/3182CE?text=User"
+          alt="User"
           className="w-28 h-28 rounded-full border-4 border-white shadow-lg"
-          onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-            e.currentTarget.src = "https://placehold.co/120x120?text=User";
-          }}
         />
         <h1 className="text-3xl font-semibold text-slate-700 mt-4">
-          {/* Display name from state */}
           {profileData.name}
         </h1>
       </div>
 
-      {/* Main Info Card */}
+      {/* Profile Card */}
       <div className="bg-white rounded-3xl shadow-lg p-6 mx-4">
-        {/* User Info Section */}
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-black mb-2">
-            ข้อมูลส่วนตัว
-          </h2>
+        <h2 className="text-lg font-semibold text-black mb-2">ข้อมูลส่วนตัว</h2>
 
-          {isEditing ? (
-            // --- EDITING MODE ---
-            <>
-              <ProfileInputRow
-                label="ชื่อ"
-                name="name"
-                value={profileData.name}
-                onChange={handleInputChange}
-              />
-              <ProfileInputRow
-                label="เบอร์โทรติดต่อ"
-                name="phone"
-                value={profileData.phone}
-                onChange={handleInputChange}
-              />
-              <ProfileInputRow
-                label="ที่อยู่"
-                name="address"
-                value={profileData.address}
-                onChange={handleInputChange}
-              />
-            </>
-          ) : (
-            // --- DISPLAY MODE ---
-            <>
-              <ProfileInfoRow label="ชื่อ" value={profileData.name} />
-              <ProfileInfoRow
-                label="เบอร์โทรติดต่อ"
-                value={profileData.phone}
-              />
-              <ProfileInfoRow label="ที่อยู่" value={profileData.address} />
-            </>
-          )}
-        </div>
+        {isEditing ? (
+          <>
+            <ProfileInputRow
+              label="ชื่อ"
+              name="name"
+              value={profileData.name}
+              onChange={handleInputChange}
+            />
+            <ProfileInputRow
+              label="เบอร์โทรติดต่อ"
+              name="phone"
+              value={profileData.phone}
+              onChange={handleInputChange}
+            />
+            <ProfileInputRow
+              label="ที่อยู่"
+              name="address"
+              value={profileData.address}
+              onChange={handleInputChange}
+            />
+          </>
+        ) : (
+          <>
+            <ProfileInfoRow label="ชื่อ" value={profileData.name} />
+            <ProfileInfoRow label="เบอร์โทร" value={profileData.phone} />
+            <ProfileInfoRow label="ที่อยู่" value={profileData.address} />
+          </>
+        )}
 
-        {/* Additional Info Section (Optional: Can be for a user bio) */}
-        <div className="mb-4">
-          <label className="text-slate-500 mb-2 block">
-            เกี่ยวกับฉัน (Bio):
-          </label>
+        {/* Bio */}
+        <div className="mt-4">
+          <label className="text-slate-500 mb-1 block">เกี่ยวกับฉัน (Bio):</label>
           <textarea
-            name="bio" // Add name attribute
-            className="w-full h-24 p-3 border border-slate-300 rounded-lg text-sm text-slate-700 placeholder-slate-400"
-            placeholder="เพิ่มคำอธิบายเกี่ยวกับตัวคุณ..."
-            value={profileData.bio} // Link to state
-            onChange={handleInputChange} // Link to handler
-            readOnly={!isEditing} // Make it read-only if NOT editing
+            name="bio"
+            className="w-full h-24 p-3 border border-slate-300 rounded-lg text-sm"
+            value={profileData.bio}
+            onChange={handleInputChange}
+            readOnly={!isEditing}
+            placeholder="เพิ่มคำอธิบาย..."
           />
         </div>
 
-        {/* Edit/Save/Cancel Buttons */}
-        <div className="flex justify-end space-x-2 mt-4">
+        {/* Buttons */}
+        <div className="flex justify-end space-x-2 mt-5">
           {isEditing ? (
-            // --- Show Save/Cancel ---
             <>
               <button
                 onClick={handleCancelClick}
-                className="flex items-center justify-center px-5 py-2.5 bg-slate-200 text-slate-700 font-semibold rounded-full shadow-md hover:bg-slate-300 transition-colors"
+                className="px-5 py-2 bg-slate-200 rounded-full"
               >
-                <span>ยกเลิก</span>
+                ยกเลิก
               </button>
               <button
                 onClick={handleSaveClick}
-                className="flex items-center justify-center px-5 py-2.5 bg-green-500 text-white font-semibold rounded-full shadow-md hover:bg-green-600 transition-colors"
+                className="px-5 py-2 bg-green-500 text-white rounded-full"
               >
-                <span>บันทึก</span>
+                บันทึก
               </button>
             </>
           ) : (
-            // --- Show Edit Button ---
             <button
               onClick={handleEditClick}
-              className="flex items-center justify-center space-x-2 px-5 py-2.5 bg-sky-500 text-white font-semibold rounded-full shadow-md hover:bg-sky-600 transition-colors"
+              className="px-5 py-2 bg-sky-500 text-white rounded-full"
             >
-              <span>แก้ไขโปรไฟล์</span>
+              แก้ไขโปรไฟล์
             </button>
           )}
         </div>

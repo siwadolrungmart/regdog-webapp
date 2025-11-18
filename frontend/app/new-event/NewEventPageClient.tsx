@@ -16,6 +16,7 @@ import {
   CurrencyDollarIcon,
   BeakerIcon,
 } from "@heroicons/react/24/outline";
+import Navigation from "@/components/navigation";
 
 // ปุ่ม category
 const CategoryButton = ({
@@ -47,9 +48,8 @@ export default function NewEventPageClient() {
     selectedDate ? `/new-event/${slug}?date=${selectedDate}` : `/new-event/${slug}`;
 
   return (
-    <div className="mobile">
-      <div className="w-full max-w-sm mx-auto p-4 relative z-10">
-        <div className="flex items-center justify-center relative mb-6">
+    <div className="mobile flex flex-col items-center px-2">
+      <div className="flex flex-col items-center justify-center relative mb-4 w-full pt-10">
           <Link href="/calendar" className="absolute left-0 text-gray-700 p-2">
             <ChevronLeftIcon className="w-6 h-6" />
           </Link>
@@ -58,7 +58,7 @@ export default function NewEventPageClient() {
           </h1>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 w-full px-4">
           {/* กิจกรรม */}
           <section>
             <h2 className="text-base font-semibold text-gray-800 mb-3 px-2">
@@ -133,7 +133,7 @@ export default function NewEventPageClient() {
             </div>
           </section>
         </div>
-      </div>
+      <Navigation />
     </div>
   );
 }

@@ -11,7 +11,7 @@ interface DogData {
   name?: string;
   gender?: "MALE" | "FEMALE" | "UNKNOWN";
   breed?: string;
-  birthDate?: string; // ใช้ string จาก API เช่น "2025-11-14"
+  birthDate?: string;
   microchipNumber?: string;
   pedigreeFileUrl?: string;
   chronicDiseases?: string;
@@ -49,9 +49,8 @@ export default function PetProfilePage() {
           setData({
             userId: dog.userId,
             name: dog.name,
-            gender: dog.gender,
+            gender: dog.gender ?? "UNKNOWN",
             breed: dog.breed ?? "",
-            // ถ้า backend ส่ง ISO string มาอยู่แล้ว ก็เก็บเป็น string ตรง ๆ
             birthDate: dog.birthDate ?? undefined,
             microchipNumber: dog.microchipNumber ?? "",
             pedigreeFileUrl: dog.pedigreeFileUrl ?? "",
@@ -62,7 +61,7 @@ export default function PetProfilePage() {
             ownerAddress: dog.ownerAddress ?? "",
             extraDescription: dog.extraDescription ?? "",
             lostStatus: ["UNKNOWN", "NORMAL", "LOST", "FOUND"].includes(
-              dog.lostStatus as any,
+              dog.lostStatus as any
             )
               ? (dog.lostStatus as DogData["lostStatus"])
               : "NORMAL",
@@ -82,7 +81,9 @@ export default function PetProfilePage() {
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
 
@@ -92,13 +93,13 @@ export default function PetProfilePage() {
             ...prev,
             [name]: value,
           }
-        : prev,
+        : prev
     );
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    // ถ้าจะ reset จริง ๆ ให้ refetch อีกครั้ง หรือเก็บ snapshot ก่อนแก้ไว้ต่างหาก
+    // ถ้าจะ reset จริง ให้ refetch หรือเก็บ snapshot ก่อนแก้ไว้
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +108,6 @@ export default function PetProfilePage() {
       const petIdStr = localStorage.getItem("petId");
       const petId = petIdStr ? Number(petIdStr) : 0;
       if (petId) {
-        // เตรียม body: ตัดค่าที่เป็น "" หรือ null ให้เป็น undefined (ไม่อัปเดต)
         const body: Partial<DogData> = {
           name: data.name || undefined,
           gender: data.gender,
@@ -125,7 +125,6 @@ export default function PetProfilePage() {
 
         try {
           await updateDog(petId, body);
-          // ถ้า backend คืน dog ใหม่กลับมา จะเอามา setData อีกทีก็ได้
         } catch (err) {
           console.error("Error updating dog:", err);
         }
@@ -135,8 +134,7 @@ export default function PetProfilePage() {
   };
 
   return (
-    <div className="mobile w-full flex flex-col items-center">
-
+    <div className="mobile w-full flex flex-col items-center pb-18">
       <header className="flex justify-between items-center px-4 z-20 w-full">
         <Bar />
       </header>
@@ -204,6 +202,15 @@ function ProfileView({ data }: { data: DogData }) {
     </div>
   );
 
+  const statusLabel =
+    data.lostStatus === "LOST"
+      ? "สัตว์เลี้ยงหาย"
+      : data.lostStatus === "FOUND"
+      ? "พบแล้ว (รอรับกลับ)"
+      : data.lostStatus === "UNKNOWN"
+      ? "ไม่ระบุ"
+      : "ปกติ";
+
   return (
     <div className="flex flex-col gap-[15px]">
       <p className="text-center text-[16px] text-black font-anuphan">
@@ -215,9 +222,10 @@ function ProfileView({ data }: { data: DogData }) {
         data.gender === "MALE"
           ? "เพศผู้"
           : data.gender === "FEMALE"
-            ? "เพศเมีย"
-            : "ไม่ระบุ",
+          ? "เพศเมีย"
+          : "ไม่ระบุ"
       )}
+      {row("สถานะ", statusLabel)}
       {row("สายพันธุ์", data.breed ?? "")}
       {row("วันเกิด", formatDateThai(data.birthDate))}
       {row("อายุ", calculateAge(data.birthDate))}
@@ -233,7 +241,9 @@ function ProfileView({ data }: { data: DogData }) {
 type ProfileFormProps = {
   data: DogData;
   onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => void;
   onCancel: () => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -258,13 +268,31 @@ function ProfileForm({ data, onChange, onCancel, onSubmit }: ProfileFormProps) {
         />
       </FormRow>
 
-      <FormRow label="เพศ (MALE/FEMALE/UNKNOWN)">
-        <input
+      <FormRow label="เพศ">
+        <select
           className={fieldClass}
           name="gender"
-          value={data.gender ?? ""}
+          value={data.gender ?? "UNKNOWN"}
           onChange={onChange}
-        />
+        >
+          <option value="MALE">เพศผู้</option>
+          <option value="FEMALE">เพศเมีย</option>
+          <option value="UNKNOWN">ไม่ระบุ</option>
+        </select>
+      </FormRow>
+
+      <FormRow label="สถานะสัตว์">
+        <select
+          className={fieldClass}
+          name="lostStatus"
+          value={data.lostStatus ?? "NORMAL"}
+          onChange={onChange}
+        >
+          <option value="NORMAL">ปกติ</option>
+          <option value="LOST">สัตว์เลี้ยงหาย</option>
+          <option value="FOUND">พบแล้ว / รอรับกลับ</option>
+          <option value="UNKNOWN">ไม่ระบุ</option>
+        </select>
       </FormRow>
 
       <FormRow label="สายพันธุ์">

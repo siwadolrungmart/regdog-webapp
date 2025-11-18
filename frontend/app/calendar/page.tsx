@@ -166,35 +166,60 @@ const CalendarPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // โหลด data จริงจาก API
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+ // ลบท่อน useEffect เดิมออก แล้วใช้แบบนี้แทน
 
-        const petIdStr = localStorage.getItem("petId");
-        const petId = petIdStr ? Number(petIdStr) : undefined;
+useEffect(() => {
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const res = await getDogEvents(petId);
-        if (res.status >= 200 && res.status < 300 && res.data?.items) {
-          const grouped = groupEventsByDate(res.data.items as ApiEventItem[]);
-          setEventsByDate(grouped);
-          // debug
-          console.log("eventsByDate", grouped);
-        } else {
-          setError(res.error ?? "โหลดข้อมูลไม่สำเร็จ");
-        }
-      } catch (e) {
-        console.error(e);
-        setError("เกิดข้อผิดพลาดในการโหลดข้อมูล");
-      } finally {
-        setLoading(false);
+      const petIdStr = localStorage.getItem("petId");
+      const petId = petIdStr ? Number(petIdStr) : undefined;
+      if (!petId) {
+        setEventsByDate({});
+        return;
       }
-    };
 
-    fetchEvents();
-  }, []);
+      // ใช้เดือนของ selectedDate ในการกำหนดช่วง
+      const year = selectedDate.getFullYear();
+      const month = selectedDate.getMonth();
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      const lastDayOfMonth  = new Date(year, month + 1, 0);
+
+      const since = new Date(firstDayOfMonth);
+      since.setHours(0, 0, 0, 0);
+
+      const until = new Date(lastDayOfMonth);
+      until.setHours(23, 59, 59, 999);
+
+      // ตรงนี้สำคัญ: getDogEvents ต้องรองรับ object แบบนี้
+      const res = await getDogEvents({
+        dogId: petId,
+        since: since.toISOString(),
+        until: until.toISOString(),
+        page: 1,
+        pageSize: 200,
+      });
+
+      if (res.status >= 200 && res.status < 300 && res.data?.items) {
+        const grouped = groupEventsByDate(res.data.items as ApiEventItem[]);
+        setEventsByDate(grouped);
+        console.log("eventsByDate", grouped);
+      } else {
+        setError(res.error ?? "โหลดข้อมูลไม่สำเร็จ");
+      }
+    } catch (e) {
+      console.error(e);
+      setError("เกิดข้อผิดพลาดในการโหลดข้อมูล");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchEvents();
+}, [selectedDate]); // 👈 เปลี่ยน dependency เป็น selectedDate
 
   const thaiWeekdays = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
   const thaiLocale = "th-TH";

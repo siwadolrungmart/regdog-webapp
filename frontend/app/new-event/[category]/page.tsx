@@ -20,6 +20,7 @@ import {
 
 import { createEvent } from "@/lib/api"; // 👈 เพิ่มอันนี้
 import { useSearchParams } from "next/navigation";
+import Navigation from "@/components/navigation";
 
 // 1. Config ของแต่ละ category (เหมือนเดิม)
 const categoryConfig: Record<string, any> = {
@@ -120,7 +121,13 @@ const DynamicEventFormPage = () => {
   const categorySlug = params.category as string;
   const config = categoryConfig[categorySlug];
 
-  const [formData, setFormData] = useState<FormState>({
+  
+const [formData, setFormData] = useState<FormState>(() => {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+
+  return {
     name: "",
     date: selectedDate
       ? new Date(selectedDate).toLocaleDateString("th-TH", {
@@ -129,7 +136,8 @@ const DynamicEventFormPage = () => {
           year: "numeric",
         })
       : "ยังไม่ได้เลือกวัน",
-    time: "12:01",
+    time: `${hh}:${mm}`,          // 👈 default เป็นเวลาปัจจุบัน
+
     duration_hr: 0,
     duration_min: 30,
     distance: 1.0,
@@ -139,7 +147,8 @@ const DynamicEventFormPage = () => {
     amount: 200,
     reminder: "everyday",
     note: "",
-  });
+  };
+});
   const [saving, setSaving] = useState(false);
 
   const handleChange = (
@@ -452,8 +461,8 @@ const DynamicEventFormPage = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto h-screen bg-gray-50 flex flex-col relative overflow-hidden">
-      <div className="flex items-center justify-center relative mb-4">
+    <div className="mobile flex flex-col items-center px-2">
+      <div className="flex items-center justify-center relative mb-4 w-full pt-10">
         <Link href="/new-event" className="absolute left-0 text-gray-700 p-2">
           <ChevronLeftIcon className="w-6 h-6" />
         </Link>
@@ -471,7 +480,7 @@ const DynamicEventFormPage = () => {
         </span>
       </div>
 
-      <div className="w-full bg-white rounded-2xl shadow-lg p-6 space-y-2">
+      <div className="w-full bg-white rounded-2xl p-6 space-y-2 border border-73a2ac">
         <h2 className="text-base font-semibold text-gray-800 mb-2">
           {config.groupTitle === "เพิ่มค่าใช้จ่าย"
             ? "ข้อมูลค่าใช้จ่าย"
@@ -541,6 +550,7 @@ const DynamicEventFormPage = () => {
           <CheckIcon className="w-5 h-5" />
         </button>
       </div>
+      <Navigation />
     </div>
   );
 };
