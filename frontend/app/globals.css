@@ -1,16 +1,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Anuphan:wght@100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Anuphan:wght@100..700&display=swap");
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 .mobile {
   position: relative;
   max-width: 448px;
   margin: 0 auto;
   min-height: 100vh;
   height: auto;
-  outline: 1px solid red;
+  outline: 1px solid rgb(126, 126, 126);
+
+  background-image: url("/background.png");
+  background-size: auto 122%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 :root {
-  --background: #ffffff;
+  --background: #930e0e;
   --foreground: #171717;
   --anuphan: "Anuphan", sans-serif;
   --inter: "Inter", sans-serif;

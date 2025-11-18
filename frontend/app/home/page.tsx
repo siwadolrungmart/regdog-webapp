@@ -45,7 +45,18 @@ type WeeklyExpense = {
   dateLabel: string;
   eventAt: string;
 };
-
+function handleFeature(label: string) {
+  switch (label) {
+    case "สรุป":
+      window.location.href = "/results";
+      break;
+    case "ออกกำลังกาย":
+      window.location.href = "/exercise";
+      break;
+    default:
+      alert("Feature coming soon!");
+  }
+}
 // ---------- UI small components ----------
 
 const FeatureCard = ({
@@ -55,7 +66,10 @@ const FeatureCard = ({
   icon: React.ElementType;
   label: string;
 }) => (
-  <div className="flex flex-col items-center justify-center gap-2 px-4 py-4 bg-white rounded-[22px] shadow-md border border-gray-100">
+  <div
+    className="flex flex-col items-center justify-center gap-2 px-4 py-4 bg-white rounded-[22px] shadow-md border border-gray-100"
+    onClick={() => handleFeature(label)}
+  >
     <div className="w-14 h-14 rounded-full border-[2px] border-[#5C8A8A] flex items-center justify-center">
       <Icon className="w-6 h-6 text-[#5C8A8A]" />
     </div>
@@ -317,12 +331,18 @@ export default function HomePage() {
       setLoadingEvents(true);
 
       const now = new Date();
-      const since = new Date(now);
-      since.setHours(0, 0, 0, 0);
+      // today 00:00
+      const today = new Date(now);
+      today.setHours(0, 0, 0, 0);
 
-      const until = new Date(now);
-      until.setDate(until.getDate() + 7);
-      until.setHours(23, 59, 59, 999);
+      // หา "วันอาทิตย์" ของสัปดาห์นี้
+      const since = new Date(today);
+      since.setDate(today.getDate() - today.getDay()); // 0 = อาทิตย์
+
+      // until = เสาร์ ของสัปดาห์นี้ (สุดวัน)
+      const until = new Date(since);
+      until.setDate(since.getDate() + 7); // ไปอาทิตย์ถัดไป
+      until.setMilliseconds(-1); // 23:59:59.999 ของเสาร์
 
       const res = await getEvent({
         dogId,
@@ -356,12 +376,15 @@ export default function HomePage() {
       setLoadingExpenses(true);
 
       const now = new Date();
-      const since = new Date(now);
-      since.setHours(0, 0, 0, 0);
+      const today = new Date(now);
+      today.setHours(0, 0, 0, 0);
 
-      const until = new Date(now);
-      until.setDate(until.getDate() + 7);
-      until.setHours(23, 59, 59, 999);
+      const since = new Date(today);
+      since.setDate(today.getDate() - today.getDay()); // อาทิตย์
+
+      const until = new Date(since);
+      until.setDate(since.getDate() + 7);
+      until.setMilliseconds(-1);
 
       const res = await getEvent({
         dogId,

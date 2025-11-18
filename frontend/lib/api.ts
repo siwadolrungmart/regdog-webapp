@@ -244,3 +244,23 @@ export async function getEvent(params?: {
     };
   }
 }
+
+export async function getDogEventsByRange(params: {
+  dogId: number;
+  since?: string;
+  until?: string;
+}) {
+  const query = new URLSearchParams();
+  query.set("dogId", String(params.dogId));
+  if (params.since) query.set("since", params.since);
+  if (params.until) query.set("until", params.until);
+
+  const res = await fetch(`${API_BASE_URL}/api/dog-events?${query.toString()}`);
+  const json = await res.json().catch(() => ({}));
+
+  return {
+    status: res.status,
+    data: json,
+    error: json.error as string | undefined,
+  };
+}
