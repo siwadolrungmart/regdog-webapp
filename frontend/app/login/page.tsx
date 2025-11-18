@@ -149,7 +149,7 @@ export default function LoginPage() {
         {/* Google Sign-in */}
         <Button
           variant="outline"
-          className="rounded-full w-full h-12 text-base"
+          className="rounded-full w-full h-12 text-base bg-white"
         >
           <GoogleIcon className="mr-2 h-5 w-5" />
           Google

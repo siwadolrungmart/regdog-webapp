@@ -12,7 +12,11 @@ export default function DogOwnershipPage() {
 
   const handleChoice = (hasDog: boolean) => {
     updateDogData({ hasDog });
-    router.push("/register/dog-name");
+    if (hasDog) {
+      router.push("/register/dog-name");
+    } else {
+      router.push("/home");
+    }
   };
   return (
     <div className="min-h-dvh w-full flex justify-center px-4 py-6 sm:py-10 bg-[url('/background.png')] bg-cover bg-center bg-no-repeat pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
@@ -41,7 +45,7 @@ export default function DogOwnershipPage() {
         <div className="flex flex-col gap-6">
           <Button
             variant="outline"
-            className="rounded-full w-full h-14 text-base font-medium border border-73a2ac hover:bg-zinc-50 text-73a2ac"
+            className="rounded-full w-full h-14 text-base font-medium border border-73a2ac hover:bg-zinc-50 text-73a2ac bg-white"
             onClick={() => handleChoice(true)}
           >
             ฉันมีสุนัข
